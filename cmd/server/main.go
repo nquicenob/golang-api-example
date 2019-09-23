@@ -1,15 +1,31 @@
 package main
 
 import (
-	"net/http"
-	
-	"github.com/labstack/echo"
+	"fmt"
+	"log"
+	"os"
+
+	"nquicenob.com/golang-api-example/internal/config"
+	"nquicenob.com/golang-api-example/internal/db"
+	"nquicenob.com/golang-api-example/internal/server"
 )
 
 func main() {
-	e := echo.New()
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
-	e.Logger.Fatal(e.Start(":1323"))
+	c, err := config.New()
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+
+	dbConn, err := db.New(c)
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+
+	db.AutoMigrate(dbConn)
+
+	e := server.New(c)
+
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", c.Port)))
 }

@@ -1,0 +1,60 @@
+version: '3.5'
+
+services:
+
+  golangapi:
+    image: nquicenob.com/golang-api-example:local
+    restart: always
+    ports:
+      - "9000:9000"
+    env_file:
+      - secrets/postgresql.env
+      - api/api.env
+    volumes:
+      - ../../build/api:/api
+    healthcheck:
+      test: ["CMD-SHELL", "curl http://localhost:9000/_health || exit 1"]
+      interval: 10s
+      timeout: 2s
+      retries: 4
+      start_period: 20s
+    depends_on:
+      - db
+
+  golangapi-dbsetup:
+    image: nquicenob.com/golang-api-example:local
+    entrypoint: /bin/true
+    env_file:
+      - secrets/postgresql.env
+      - api/api.env
+    volumes:
+      - ../../build/api:/api
+      - ../../build/db-setup:/db-setup
+    depends_on:
+      - db
+
+  db:
+    image: postgres:9.4
+    restart: always
+    ports:
+      - "5432:5432"
+    env_file:
+      - secrets/postgresql.env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U golangapi"]
+      interval: 3s
+      timeout: 2s
+      retries: 100
+
+  dbweb:
+    image: sosedoff/pgweb
+    restart: always
+    ports:
+      - "8082:8081"
+    env_file:
+      - secrets/postgresql.env
+    depends_on:
+      - db
+
+
+
