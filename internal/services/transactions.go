@@ -22,15 +22,15 @@ type transactionsService struct {
 }
 
 type Amount struct {
-	Value    string `json:"value"`
-	Currency string `json:"currency"`
+	Value    string `json:"value" validate:"required,numeric,max=20"`
+	Currency string `json:"currency" validate:"required,eq=EUR"`
 	Type     string `json:"-"`
 }
 
 type Transaction struct {
-	Amount          Amount `json:"amount"`
-	Concept         string `json:"concept"`
-	TargetAccountID string `json:"target_account_id"`
+	Amount          Amount `json:"amount" validate:"required"`
+	Concept         string `json:"concept" validate:"required"`
+	TargetAccountID string `json:"target_account_id" validate:"required"`
 }
 
 type TransactionResult struct {
@@ -54,6 +54,9 @@ type AccountBalance struct {
 }
 
 func (ts transactionsService) CreateTransaction(originAccountID string, t *Transaction) (r *TransactionResult, err error) {
+	if originAccountID == t.TargetAccountID {
+		return r, ERROR_CONFLICT_TARGET
+	}
 
 	t.Amount.Type = string(models.LedgerRecordDebit)
 	accountOrigin := &models.Account{ID: originAccountID}
