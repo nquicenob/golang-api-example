@@ -24,7 +24,6 @@ func New(c config.Specification) (db *gorm.DB, err error) {
 		c.DBPass,
 		c.DBConnectTimeout,
 	)
-	try.MaxRetries = c.DBConnRetries
 	err = try.Do(func(attempt int) (bool, error) {
 		db, err = gorm.Open("postgres", connStr)
 		if err != nil {
@@ -41,7 +40,7 @@ func New(c config.Specification) (db *gorm.DB, err error) {
 //TODO: err check
 func AutoMigrate(db *gorm.DB) {
 	db.AutoMigrate(
-		&models.User{},
+		&models.Currency{},
 		&models.Account{},
 		&models.Transaction{},
 		&models.LedgerRecord{},
@@ -50,4 +49,31 @@ func AutoMigrate(db *gorm.DB) {
 
 func DropSchema(db *gorm.DB) {
 	db.Exec("DROP SCHEMA public CASCADE; CREATE SCHEMA public;")
+}
+
+func LoadAccountsData(db *gorm.DB, accounts []*models.Account) {
+	for _, account := range accounts {
+		if err := db.Create(account).Error; err != nil {
+			log.Println(err)
+			log.Fatalln("Unexpected ERROR while it's saving the following account -> ", account.ID, " | ", account.Email)
+		}
+	}
+}
+
+func LoadCurrenciesData(db *gorm.DB, currencies []*models.Currency) {
+	for _, currency := range currencies {
+		if err := db.Create(currency).Error; err != nil {
+			log.Println(err)
+			log.Fatalln("Unexpected ERROR while it's saving the following currency -> ", currency.ID, " | ", currency.Symbol)
+		}
+	}
+}
+
+func LoadTransactionsData(db *gorm.DB, txs []*models.Transaction) {
+	for _, tx := range txs {
+		if err := db.Create(tx).Error; err != nil {
+			log.Println(err)
+			log.Fatalln("Unexpected ERROR while it's saving the following currency -> ", tx.ID, " | ", tx.Concept)
+		}
+	}
 }

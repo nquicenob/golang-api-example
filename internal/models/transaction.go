@@ -7,7 +7,6 @@ type Transaction struct {
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     *time.Time `sql:"index"`
-	Concep        string
-	Amount        string          `gorm:"type:varchar(100);unique_index"`
+	Concept       string
 	LedgerRecords []*LedgerRecord `gorm:"foreignkey:TransactionID"`
 }

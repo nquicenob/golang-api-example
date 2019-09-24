@@ -5,16 +5,19 @@ import "github.com/jinzhu/gorm"
 type LedgerRecordType string
 
 const (
-	LedgerRecordDebit   LedgerRecordType = "DEBIT"
-	LedgerRecordCreedit LedgerRecordType = "CREDIT"
+	LedgerRecordDebit  LedgerRecordType = "DEBIT"
+	LedgerRecordCredit LedgerRecordType = "CREDIT"
 )
 
 type LedgerRecord struct {
 	gorm.Model
-	Amount           string           `gorm:"not null"`
+
 	Type             LedgerRecordType `gorm:"not null"`
-	Balance          string           `gorm:"not null"`
-	PreviousBanlance string           `gorm:"not null"`
-	TransactionID    string           `gorm:"type:varchar(30) REFERENCES transactions(id);not null"`
-	AccountID        uint             `gorm:"type:varchar(30) REFERENCES accounts(id);not null"`
+	Balance          string           `gorm:"type:numeric(15,4);not null"`
+	Amount           string           `gorm:"type:numeric(15,4);not null"`
+	PreviousBanlance string           `gorm:"type:numeric(15,4);not null"`
+
+	TransactionID string `gorm:"type:varchar(30) REFERENCES transactions(id);not null"`
+	AccountID     string `gorm:"type:varchar(30) REFERENCES accounts(id);not null"`
+	CurrencyID    uint   `gorm:"type:bigint REFERENCES currencies(id);not null"`
 }

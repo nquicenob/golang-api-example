@@ -8,6 +8,7 @@ type Specification struct {
 	Debug    bool   `envconfig:"DEBUG"`
 	Port     string `envconfig:"PORT"`
 	LogLevel string `envconfig:"LOG_LEVEL"`
+	RetryTx  int    `envconfig:"MAX_RETRY_TX"`
 
 	DBHost           string `envconfig:"DATABASE_HOST"`
 	DBPort           string `envconfig:"DATABASE_PORT"`

@@ -41,17 +41,6 @@ run:
 	--network="host" \
 	$(GOIMG) go run cmd/server/main.go
 
-.PHONY: db-setup
-db-setup: 
-	docker run \
-	--rm \
-	-w $(WORKSPACE) \
-	-v ${PWD}:$(WORKSPACE) \
-	--env-file resources/docker-compose/api/api.env \
-	--env-file resources/docker-compose/secrets/postgresql.env \
-	--network="host" \
-	$(GOIMG) go run cmd/db-setup/*.go
-
 .PHONY: build-db-setup
 build-db-setup: 
 	docker run \
@@ -64,39 +53,34 @@ build-db-setup:
 	-o build/db-setup \
 	cmd/db-setup/*.go
 
-.PHONY: logs
-logs: 
+.PHONY: dlogs
+dlogs: 
 	docker logs -f $(DOCKER_RUN_NAME) 
 
-.PHONY: stop
-stop: 
+.PHONY: dstop
+dstop: 
 	docker stop $(DOCKER_RUN_NAME)
-
-.PHONY: get
-get:
-	docker run --rm  -w $(WORKSPACE) -v ${PWD}:$(WORKSPACE) $(GOIMG) go get -u $(filter-out $@,$(MAKECMDGOALS))
-
-.PHONY: mod
-mod:
-	docker run --rm  -w $(WORKSPACE) -v ${PWD}:$(WORKSPACE) $(GOIMG) go mod $(filter-out $@,$(MAKECMDGOALS))
 
 clean:
 	rm -rf build 
 
-.PHONY: test-e2e
-test-e2e: clean build-db-setup build-image 
+.PHONY: setup
+setup: clean build-db-setup build-image 
 	./bin/dc-start --build && \
 	./bin/dc-wait && \
 	./bin/dc-run --entrypoint /db-setup golangapi-dbsetup 
+
+.PHONY: stop
+stop: 
+	./bin/dc-down
 	
-.PHONY: jia
-jia: 
-	docker run -d --rm -w $(WORKSPACE) -v ${PWD}:$(WORKSPACE) --network="host" $(GOIMG) go test
-
-
-	
-# && \
-# docker run -d --rm -w $(WORKSPACE) -v ${PWD}:$(WORKSPACE) --network="host" $(GOIMG) go test && \
-# ./bin/dc-down
-
-
+.PHONY: test-e2e
+test-e2e: 
+	./bin/dc-run -d -p 5432:5432 db && \
+	./bin/dc-wait && \
+	docker run --rm -w $(WORKSPACE) -v ${PWD}:$(WORKSPACE) \
+	--env-file resources/docker-compose/api/api.env \
+	--env-file resources/docker-compose/secrets/postgresql.env \
+	--env-file resources/docker-compose/e2e-test/e2e-test.env \
+	--network="host" $(GOIMG) go test -v internal/handlers/*.go || ./bin/dc-down && \
+	./bin/dc-down
