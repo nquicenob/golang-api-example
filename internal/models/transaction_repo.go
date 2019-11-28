@@ -23,8 +23,8 @@ type TransactionsRepository interface {
 	FindCurrencyBySymbol(*Currency) error
 }
 
-func NewTransactionsRepository(db *gorm.DB, cf config.Specification) TransactionsRepository {
-	return transactionsRepository{
+func NewTransactionsRepository(db *gorm.DB, cf *config.Specification) TransactionsRepository {
+	return &transactionsRepository{
 		db: db,
 	}
 }
@@ -34,7 +34,7 @@ type transactionsRepository struct {
 	cf *config.Specification
 }
 
-func (tr transactionsRepository) executeTransactionStep(sqlTransaction *gorm.DB, ledgerRecord *LedgerRecord, txID string) (err error) {
+func (tr *transactionsRepository) executeTransactionStep(sqlTransaction *gorm.DB, ledgerRecord *LedgerRecord, txID string) (err error) {
 	account := &Account{ID: ledgerRecord.AccountID}
 	if err := sqlTransaction.Where("id = ?", ledgerRecord.AccountID).Last(account).Error; err != nil {
 		return err
@@ -70,7 +70,7 @@ func onFail(sqlTransaction *gorm.DB, d time.Duration) {
 	time.Sleep(d)
 }
 
-func (tr transactionsRepository) CreateTransaction(ledgerRecordOrigin *LedgerRecord, ledgerRecordTarget *LedgerRecord, concept string) (err error) {
+func (tr *transactionsRepository) CreateTransaction(ledgerRecordOrigin *LedgerRecord, ledgerRecordTarget *LedgerRecord, concept string) (err error) {
 	entropy := rand.Reader
 	tx := &Transaction{
 		ID:      ulid.MustNew(ulid.Timestamp(time.Now()), entropy).String(),
@@ -107,16 +107,10 @@ func (tr transactionsRepository) CreateTransaction(ledgerRecordOrigin *LedgerRec
 	return err
 }
 
-func (tr transactionsRepository) FindLastLedgerRecordByAccountID(lr *LedgerRecord) (err error) {
-	if err := tr.db.Where("account_id = ?", lr.AccountID).Last(lr).Error; err != nil {
-		return err
-	}
-	return nil
+func (tr *transactionsRepository) FindLastLedgerRecordByAccountID(lr *LedgerRecord) (err error) {
+	return tr.db.Where("account_id = ?", lr.AccountID).Last(lr).Error
 }
 
-func (tr transactionsRepository) FindCurrencyBySymbol(c *Currency) (err error) {
-	if err := tr.db.Where("symbol = ?", c.Symbol).First(c).Error; err != nil {
-		return err
-	}
-	return nil
+func (tr *transactionsRepository) FindCurrencyBySymbol(c *Currency) (err error) {
+	return tr.db.Where("symbol = ?", c.Symbol).First(c).Error
 }

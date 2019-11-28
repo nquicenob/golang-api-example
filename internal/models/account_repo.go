@@ -9,7 +9,7 @@ type AccountRepository interface {
 }
 
 func NewAccountRepository(db *gorm.DB) AccountRepository {
-	return accountRepository{
+	return &accountRepository{
 		db: db,
 	}
 }
@@ -18,9 +18,6 @@ type accountRepository struct {
 	db *gorm.DB
 }
 
-func (tr accountRepository) FindAccountID(a *Account) (err error) {
-	if err := tr.db.First(&a, "id = ?", a.ID).Error; err != nil {
-		return err
-	}
-	return nil
+func (tr *accountRepository) FindAccountID(a *Account) (err error) {
+	return tr.db.First(&a, "id = ?", a.ID).Error
 }

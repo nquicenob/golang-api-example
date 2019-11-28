@@ -10,7 +10,7 @@ type TransactionsService interface {
 }
 
 func NewTransactionsService(tr models.TransactionsRepository, ac models.AccountRepository) TransactionsService {
-	return transactionsService{
+	return &transactionsService{
 		transactionsRepo: tr,
 		accountRepo:      ac,
 	}
@@ -28,18 +28,18 @@ type Amount struct {
 }
 
 type Transaction struct {
-	Amount          Amount `json:"amount" validate:"required"`
-	Concept         string `json:"concept" validate:"required"`
-	TargetAccountID string `json:"target_account_id" validate:"required"`
+	Amount          *Amount `json:"amount" validate:"required"`
+	Concept         string  `json:"concept" validate:"required"`
+	TargetAccountID string  `json:"target_account_id" validate:"required"`
 }
 
 type TransactionResult struct {
-	ID               uint   `json:"id"`
-	Amount           Amount `json:"amount"`
-	Concept          string `json:"concept"`
-	TargetAccountID  string `json:"target_account_id"`
-	PreviousBanlance Amount `json:"previous_banlance"`
-	Banlance         Amount `json:"banlance"`
+	ID               uint    `json:"id"`
+	Amount           *Amount `json:"amount"`
+	Concept          string  `json:"concept"`
+	TargetAccountID  string  `json:"target_account_id"`
+	PreviousBanlance *Amount `json:"previous_banlance"`
+	Banlance         *Amount `json:"banlance"`
 }
 
 type Owner struct {
@@ -48,12 +48,12 @@ type Owner struct {
 }
 
 type AccountBalance struct {
-	AccountNumber string `json:"account_number"`
-	Owner         Owner  `json:"owner"`
-	Balance       Amount `json:"balance"`
+	AccountNumber string  `json:"account_number"`
+	Owner         *Owner  `json:"owner"`
+	Balance       *Amount `json:"balance"`
 }
 
-func (ts transactionsService) CreateTransaction(originAccountID string, t *Transaction) (r *TransactionResult, err error) {
+func (ts *transactionsService) CreateTransaction(originAccountID string, t *Transaction) (r *TransactionResult, err error) {
 	if originAccountID == t.TargetAccountID {
 		return r, ERROR_CONFLICT_TARGET
 	}
@@ -101,11 +101,11 @@ func (ts transactionsService) CreateTransaction(originAccountID string, t *Trans
 		Amount:          t.Amount,
 		Concept:         t.Concept,
 		TargetAccountID: t.TargetAccountID,
-		PreviousBanlance: Amount{
+		PreviousBanlance: &Amount{
 			Value:    ledgerRecordOrigin.PreviousBanlance,
 			Currency: t.Amount.Currency,
 		},
-		Banlance: Amount{
+		Banlance: &Amount{
 			Value:    ledgerRecordOrigin.Balance,
 			Currency: t.Amount.Currency,
 		},
@@ -114,7 +114,7 @@ func (ts transactionsService) CreateTransaction(originAccountID string, t *Trans
 	return r, err
 }
 
-func (ts transactionsService) GetAccountAndBalance(originAccountID string) (b *AccountBalance, err error) {
+func (ts *transactionsService) GetAccountAndBalance(originAccountID string) (b *AccountBalance, err error) {
 	account := &models.Account{ID: originAccountID}
 	if err := ts.accountRepo.FindAccountID(account); err != nil {
 		return b, err
@@ -122,11 +122,11 @@ func (ts transactionsService) GetAccountAndBalance(originAccountID string) (b *A
 
 	return &AccountBalance{
 		AccountNumber: account.ID,
-		Owner: Owner{
+		Owner: &Owner{
 			Name:  account.Name,
 			Email: account.Email,
 		},
-		Balance: Amount{
+		Balance: &Amount{
 			Value:    account.Balance,
 			Currency: "EUR",
 		},

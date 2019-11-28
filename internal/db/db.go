@@ -13,7 +13,7 @@ import (
 	"nquicenob.com/golang-api-example/internal/models"
 )
 
-func New(c config.Specification) (db *gorm.DB, err error) {
+func New(c *config.Specification) (db *gorm.DB, err error) {
 	connStr := fmt.Sprintf(
 		"host=%s port=%s user=%s dbname=%s sslmode=%s password=%s connect_timeout=%s",
 		c.DBHost,

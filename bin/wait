@@ -5,13 +5,17 @@ timeout=60
 start_time=$(date +%s)
 deadline=$((${start_time} + ${timeout}))
 
+set -e
+
+export tag=$(./bin/get-version)
+
 while true; do
-    output=$(docker-compose -f resources/docker-compose/docker-compose.yml ps | grep -E 'Up \(health: starting\)|Exit 1')
+    output=$(docker-compose ps | grep -E 'Up \(health: starting\)|Exit 1')
     if [ -z "$output" ]; then
         break
 	elif [ $(date +%s) -ge ${deadline} ]; then
         echo "Timeout after ${timeout}s"
-        docker-compose -f resources/docker-compose/docker-compose.yml ps
+        docker-compose ps
         exit 1
     fi
     sleep 1

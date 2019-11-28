@@ -15,7 +15,7 @@ type TransactionHandler interface {
 }
 
 func NewTransactionHandler(ts services.TransactionsService) TransactionHandler {
-	return transactionHandler{
+	return &transactionHandler{
 		transactionsService: ts,
 	}
 }
@@ -36,7 +36,7 @@ type AccountBalance struct {
 	Data *services.AccountBalance `json:"data"`
 }
 
-func (handler transactionHandler) Create(c echo.Context) (err error) {
+func (handler *transactionHandler) Create(c echo.Context) (err error) {
 	originAccountID := c.Param("account_id")
 	ti := new(TransactionInput)
 	if err = c.Bind(ti); err != nil {
@@ -67,7 +67,7 @@ func (handler transactionHandler) Create(c echo.Context) (err error) {
 	)
 }
 
-func (handler transactionHandler) Find(c echo.Context) (err error) {
+func (handler *transactionHandler) Find(c echo.Context) (err error) {
 	originAccountID := c.Param("account_id")
 	result, err := handler.transactionsService.GetAccountAndBalance(originAccountID)
 	if err != nil {

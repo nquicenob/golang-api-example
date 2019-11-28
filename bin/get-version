@@ -1,0 +1,3 @@
+#!/bin/bash
+
+echo $(bin/get-branch)-$(bin/get-commit)

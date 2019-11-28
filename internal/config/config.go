@@ -20,8 +20,9 @@ type Specification struct {
 	DBConnectTimeout string `envconfig:"DATABASE_CONN_TIMEOUT"`
 }
 
-func New() (s Specification, err error) {
-	if err := envconfig.Process("golangapi", &s); err != nil {
+func New() (s *Specification, err error) {
+	s = new(Specification)
+	if err := envconfig.Process("golangapi", s); err != nil {
 		return s, err
 	}
 	return s, nil

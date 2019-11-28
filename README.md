@@ -11,7 +11,8 @@
 Run:
 
 ```bash
-$ make setup
+$  ./bin/build
+$  ./bin/start
 ```
 
 Check it:
@@ -19,9 +20,3 @@ Check it:
 ```sh
 $ curl http://localhost:9000/_health
 ```
-
-## Test
-
-```sh
-$ make test-e2e
-``` 

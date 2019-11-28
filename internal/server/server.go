@@ -17,7 +17,7 @@ var loggerlvl = map[string]log.Lvl{
 	"off":   log.OFF,
 }
 
-func New(config config.Specification) *echo.Echo {
+func New(config *config.Specification) *echo.Echo {
 	e := echo.New()
 	e.Logger.SetLevel(loggerlvl[config.LogLevel])
 
