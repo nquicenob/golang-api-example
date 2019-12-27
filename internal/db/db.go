@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -14,16 +15,21 @@ import (
 )
 
 func New(c *config.Specification) (db *gorm.DB, err error) {
-	connStr := fmt.Sprintf(
-		"host=%s port=%s user=%s dbname=%s sslmode=%s password=%s connect_timeout=%s",
-		c.DBHost,
-		c.DBPort,
-		c.DBUser,
-		c.DBName,
-		c.DBSSLMode,
-		c.DBPass,
-		c.DBConnectTimeout,
-	)
+	var connStr string
+	if c.IsHeroku {
+		connStr = os.Getenv("DATABASE_URL")
+	} else {
+		connStr = fmt.Sprintf(
+			"host=%s port=%s user=%s dbname=%s sslmode=%s password=%s connect_timeout=%s",
+			c.DBHost,
+			c.DBPort,
+			c.DBUser,
+			c.DBName,
+			c.DBSSLMode,
+			c.DBPass,
+			c.DBConnectTimeout,
+		)
+	}
 	err = try.Do(func(attempt int) (bool, error) {
 		db, err = gorm.Open("postgres", connStr)
 		if err != nil {

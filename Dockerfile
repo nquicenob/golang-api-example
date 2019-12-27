@@ -35,4 +35,4 @@ USER akuser
 COPY --from=builder /build/_output/rest-api /usr/local/bin/rest-api
 COPY --from=builder /build/_output/db-setup /usr/local/bin/db-setup
 
-ENTRYPOINT [ "/bin/sh", "-c", "db-setup && rest-api" ]
+ENTRYPOINT [ "/bin/sh", "-c", "rest-api" ]

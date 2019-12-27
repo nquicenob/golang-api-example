@@ -10,6 +10,8 @@ type Specification struct {
 	LogLevel string `envconfig:"LOG_LEVEL"`
 	RetryTx  int    `envconfig:"MAX_RETRY_TX"`
 
+	IsHeroku bool `envconfig:"IS_HEROKU"`
+
 	DBHost           string `envconfig:"DATABASE_HOST"`
 	DBPort           string `envconfig:"DATABASE_PORT"`
 	DBSSLMode        string `envconfig:"DATABASE_SSL_MODE"`
